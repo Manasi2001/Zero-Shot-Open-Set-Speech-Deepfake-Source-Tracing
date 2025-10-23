@@ -251,7 +251,7 @@ SOFTWARE.
 
 - This work was partially supported by the **Academy of Finland** (Decision No. 349605, project “SPEECHFAKES”).  
 - Computational resources were provided by **CSC – IT Center for Science, Finland**.  
-- The SSL-AASIST architecture builds upon the implementation from [TakHemlata/SSL_Anti-spoofing]([https://github.com/clovaai/aasist](https://github.com/TakHemlata/SSL_Anti-spoofing)).
+- The SSL-AASIST architecture builds upon the implementation from [TakHemlata/SSL_Anti-spoofing](https://github.com/TakHemlata/SSL_Anti-spoofing).
 
 ---
 
