@@ -44,39 +44,41 @@ By treating source tracing as an open-set verification problem, similar to speak
 │   ├── few_shot_siamese_network_CL_SSL_AASIST_AAM_RegMixup.pt
 │   └── zero_shot_siamese_network_CL_SSL_AASIST_AAM_RegMixup.pt
 │
-├── trial_embeddings.npy*                   # Trial embeddings extracted by SSL_AASIST_AAM (NumPy .npy file)
-├── SSL_AASIST.py                           # Model definition / architecture used for training & inference
+├── trial_embeddings_SSL_AASIST_AAM_RegMixup.npy*                           # Trial embeddings extracted from SSL-AASIST (NumPy .npy file)
+├── trial_embeddings_SSL_ResNet_AAM.npy*                                    # Trial embeddings extracted from SSL-ResNet (NumPy .npy file)
+├── SSL_AASIST_AAM_RegMixup.py              # Model definition / architecture used for training & inference
+├── ResNet34.py                             # Model definition / architecture used for training & inference
 │
 ├── STOPA+ASVspoof2019/                     # Dataset directory
 │   ├── protocols/
 │   │   ├── stopa_asvspoof2019_train.txt
 │   │   └── stopa_asvspoof2019_dev.txt
-│   └── all_files/                          # Place STOPA and ASVspoof2019 training files here only
+│   └── all_files/                          # Place STOPA and ASVspoof2019 training files here
 │
 ├── evaluation_files_with_scores/*          # Score files from evaluation scripts
-│   ├── evaluation_mlp.csv
-│   ├── evaluation_few_shot_siamese_network_CE.csv
-│   ├── evaluation_few_shot_siamese_network_CL.csv
-│   └── evaluation_zero_shot_siamese_network_CL.csv
+│   ├── evaluation_mlp_SSL_AASIST_AAM_RegMixup.csv
+│   ├── evaluation_few_shot_siamese_network_CL_SSL_AASIST_AAM_RegMixup.csv
+│   └── evaluation_zero_shot_siamese_network_CL_SSL_AASIST_AAM_RegMixup.csv
 │
 ├── EERs_mlp/                               # EER results for few-shot MLP backend
-├── EERs_few_shot_siamese_network_CE/       # EER results for Siamese (CE)
 ├── EERs_few_shot_siamese_network_CL/       # EER results for Siamese (CL)
 ├── EERs_zero_shot_siamese_network_CL/      # EER results for zero-shot Siamese
 ├── EERs_cosine_similarity/                 # (See STOPA repo for cosine similarity setup)
 │
-├── train_SSL_AASIST_AAM.py                 # Train SSL-AASIST + AAM embedding extractor
+├── train_SSL_AASIST_AAM_RegMixup.py        # Train SSL-AASIST + AAM + RegMixup embedding extractor
+├── train_SSL_ResNet34_AAM.py               # Train SSL-ResNet + AAM embedding extractor
 ├── train_few_shot_mlp.py                   # Train few-shot MLP backend
-├── train_few_shot_siamese_network_CE.py    # Train Siamese backend (cross-entropy loss)
 ├── train_few_shot_siamese_network_CL.py    # Train Siamese backend (contrastive loss)
 ├── train_zero_shot_siamese_network_CL.py   # Train zero-shot Siamese backend
 │
 ├── utils.py                                # Utility and helper functions
-└── fingerprint_all_emb.csv*                # Consolidated fingerprint embeddings
+├── fingerprint_all_emb_SSL_AASIST_AAM_RegMixup.csv*                         # Consolidated fingerprint embeddings derived from SSL-AASIST
+└── fingerprint_all_emb_SSL_ResNet_AAM.csv*                                  # Consolidated fingerprint embeddings derived from SSL-Resnet
 ```
 
 **Large files/folders that could not be uploaded on GitHub due to size limit can be accessed [here](https://studentuef-my.sharepoint.com/:f:/g/personal/manachhi_uef_fi/EswpEijCiwtPgfpeSrsoOd0BM5vC8WkJCqXMyzVLmKsoug?e=VLWp7I).*
 
+👉 The older version of this repository is also made available in the same drive folder as **v1_Github.zip**.   
 
 ---
 
@@ -110,25 +112,37 @@ The evaluation scripts require `protocols_trials_extended/`, which can be downlo
 
 ---
 
-## Step 1: Train SSL-AASIST + AAM Embedding Extractor
+## Step 1: Train Embedding Extractor
 
 ```
-python train_SSL_AASIST_AAM.py --config config/AASIST_STOPA_ASVspoof2019.conf
+python train_SSL_AASIST_AAM_RegMixup.py --config config/STOPA_ASVspoof2019.conf
+```
+or
+
+```
+python train_SSL_ResNet34_AAM.py --config config/Resnet34.conf
 ```
 
-- Trains the SSL-AASIST embedding extractor with **additive angular margin loss** on STOPA + ASVspoof2019 data.  
+- Trains the SSL-AASIST/SSL-ResNet34 embedding extractor on STOPA + ASVspoof2019 data.  
 - Runs for **100 epochs**, saving intermediate checkpoints in `exp_results/` (e.g., `epoch_1.pth`, `epoch_100.pth`, etc.).  
-- For this repository, one of the best-performing models (based on **minimum training loss**) was selected and renamed to `SSL_AASIST_AAM.pth` for convenience.  
+- For this repository, one of the best-performing models (based on **minimum training loss**) was selected and renamed to `SSL_AASIST_AAM_RegMixup.pth`/`SSL_ResNet34_AAM.pth` for convenience.  
 - You may experiment with alternative checkpoints for performance comparison.
 
 ## Step 2: Extract Embeddings
 
 ```
-python extract_STOPA_ASVspoof2019_embeddings.py
+python extract_STOPA_ASVspoof2019_embeddings_from_SSL_AASIST_AAM_RegMixup.py
+```
+or
+
+```
+python extract_STOPA_ASVspoof2019_embeddings_from_SSL_ResNet_AAM.py
 ```
 
-- Uses the trained SSL-AASIST model to extract **attack embeddings**.
-- Saves the embeddings to `STOPA_ASVspoof2019_embeddings.csv`.
+- Uses the trained model to extract **attack embeddings**.
+- Saves the embeddings to `STOPA_ASVspoof2019_embeddings_from_SSL_AASIST_AAM_RegMixup.csv`/`STOPA_ASVspoof2019_embeddings_from_SSL_ResNet_AAM.csv`.
+
+👉 We proceed with **SSL_AASIST_AAM_RegMixup** as our front-end (see Table 1 in the paper for performance comparisons).
 
 ## Step 3: Train Backend Models
 
@@ -140,17 +154,9 @@ python train_few_shot_mlp.py
 
 ### (b) Few-Shot Siamese Networks
 
-- Cross-Entropy loss:
-  
-  ```
-  python train_few_shot_siamese_network_CE.py
-  ```
-  
-- Contrastive loss:
-
-  ```
-  python train_few_shot_siamese_network_CL.py
-  ```
+```
+python train_few_shot_siamese_network_CL.py
+```
   
 ### (c) Zero-Shot Siamese Network
 
@@ -160,7 +166,7 @@ python train_zero_shot_siamese_network_CL.py
 
 Each model is saved under `models/` and evaluated separately in the next step.
 
-### Step 4: Evaluate Backend Models
+## Step 4: Evaluate Backend Models
 
 ```
 python evaluate_mlp.py
@@ -171,15 +177,13 @@ python evaluate_siamese_network.py
 
 - Files include:
 
-  - `evaluation_mlp.csv`
+  - `evaluation_mlp_SSL_AASIST_AAM_RegMixup.csv`
   
-  - `evaluation_few_shot_siamese_network_CE.csv`
+  - `evaluation_few_shot_siamese_network_CL_SSL_AASIST_AAM_RegMixup.csv`
   
-  - `evaluation_few_shot_siamese_network_CL.csv`
-  
-  - `evaluation_zero_shot_siamese_network_CL.csv`
+  - `evaluation_zero_shot_siamese_network_CL_SSL_AASIST_AAM_RegMixup.csv`
 
-### Step 5: Compute Equal Error Rate (EER)
+## Step 5: Compute Equal Error Rate (EER)
 
 ```
 python compute_eer_mlp.py
@@ -192,7 +196,6 @@ python compute_eer_siamese.py
 
   ```
   EERs_mlp/
-  EERs_few_shot_siamese_network_CE/
   EERs_few_shot_siamese_network_CL/
   EERs_zero_shot_siamese_network_CL/
   ```
