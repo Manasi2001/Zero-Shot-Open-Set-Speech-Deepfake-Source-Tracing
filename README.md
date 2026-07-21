@@ -1,20 +1,21 @@
 # Zero-Shot Open-Set Speech Deepfake Source Tracing
 
-This repository provides the official implementation for the paper: **“Advancing Zero-Shot Open-Set Speech Deepfake Source Tracing”** [[arXiv:2509.24674](https://arxiv.org/abs/2509.24674)].
+This repository provides the official implementation of the paper [Advancing Zero-Shot Open-Set Speech Deepfake Source Tracing](https://www.isca-archive.org/odyssey_2026/chhibber26_odyssey.pdf), accepted at Odyssey 2026.
 
-The repository provides code to reproduce the **SSL-AASIST + AAM results (Table 1)** and **backend scoring experiments (Table 2)** from the paper. For reproducing **cosine similarity**–based results in Table 2, please refer to the companion repository:  
-➡️ [STOPA Repository](https://github.com/Manasi2001/STOPA) 
+We provide scripts to reproduce the **backend scoring experiments** from the paper. For reproducing **cosine similarity**–based results in Table 2, please refer to the companion repository ➡️ [STOPA](https://github.com/Manasi2001/STOPA). 
 
 ---
 
 ## Overview
 
-This work introduces a **zero-shot and few-shot verification framework** for speech deepfake source tracing. It adapts the **SSL-AASIST** architecture for open-set attribution, combining self-supervised front ends with additive angular margin (AAM) loss and backend scoring methods such as cosine similarity, Siamese networks, and MLP classifiers.
+This repository presents a novel **zero-shot and few-shot framework** for open-set speech deepfake source tracing. Moving beyond simple spoofing detection, this work focuses on attributing a spoofed utterance to its specific underlying generation method.  
+
+By treating source tracing as an open-set verification problem, similar to speaker verification, the system compares trial embeddings against enrolled attack fingerprints to accept or reject a claimed source. The framework utilizes an **SSL-AASIST** architecture (optimized with **Additive Angular Margin (AAM) loss** and a **RegMixup** strategy) to extract robust attack embeddings to ensure high discriminability across both known and unknown attack types.
 
 **Key features:**
 - Zero-shot and few-shot backend scoring for open-set spoof attribution  
 - SSL-AASIST embedding extractor with AAM-softmax objective  
-- Evaluation of MLP and Siamese backends (cross-entropy & contrastive)  
+- Evaluation of MLP and Siamese backends  
 - Reproducible STOPA [1] + ASVspoof2019 [2] training/evaluation protocols  
 
 ---
@@ -26,20 +27,22 @@ This work introduces a **zero-shot and few-shot verification framework** for spe
 ├── compute_eer_mlp.py                      # Compute EER for few-shot MLP backend
 ├── compute_eer_siamese.py                  # Compute EER for Siamese backends (few-shot, zero-shot)
 ├── config/
-│   └── AASIST_STOPA_ASVspoof2019.conf      # Config for SSL-AASIST + AAM training
+│   ├── Resnet34.conf                       # Config for SSL-ResNet + AAM training
+│   └── AASIST_STOPA_ASVspoof2019.conf      # Config for SSL-AASIST + AAM + RegMixup training
 │
 ├── data_utils.py                           # Dataset utilities for STOPA and ASVspoof2019
 ├── evaluate_mlp.py                         # Evaluate few-shot MLP backend
 ├── evaluate_siamese_network.py             # Evaluate Siamese network backends
 ├── evaluation.py                           # Unified evaluation and EER computation
 │
-├── extract_STOPA_ASVspoof2019_embeddings.py# Extract SSL-AASIST embeddings
+├── extract_STOPA_ASVspoof2019_embeddings_from_SSL_AASIST_AAM_RegMixup.py   # Extract training set embeddings from SSL-AASIST
+├── extract_STOPA_ASVspoof2019_embeddings_from_SSL_ResNet_AAM.py            # Extract training set embeddings from SSL-ResNet
 │
 ├── models/                                 # Trained model checkpoints
-│   ├── SSL_AASIST_AAM.pth*                 # Selected best checkpoint (renamed for convenience)
-│   ├── few_shot_siamese_network_CE.pt
-│   ├── few_shot_siamese_network_CL.pt
-│   └── zero_shot_siamese_network_CL.pt
+│   ├── SSL_AASIST_AAM_RegMixup.pth*        # Selected best checkpoint (renamed for convenience)
+│   ├── SSL_ResNet34_AAM.pth*               # Selected best checkpoint (renamed for convenience)
+│   ├── few_shot_siamese_network_CL_SSL_AASIST_AAM_RegMixup.pt
+│   └── zero_shot_siamese_network_CL_SSL_AASIST_AAM_RegMixup.pt
 │
 ├── trial_embeddings.npy*                   # Trial embeddings extracted by SSL_AASIST_AAM (NumPy .npy file)
 ├── SSL_AASIST.py                           # Model definition / architecture used for training & inference
